@@ -324,6 +324,41 @@ h3 {
   line-height: 1.15;
 }
 
+.estimate-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.metric-card {
+  display: grid;
+  gap: 6px;
+  min-height: 98px;
+  padding: 14px;
+  border: 1px solid rgba(29, 43, 37, 0.14);
+  background: #fffdf8;
+}
+
+.metric-card span {
+  color: #6c6a60;
+  font-size: 0.72rem;
+  font-weight: 820;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.metric-card strong {
+  color: #18352d;
+  font-size: clamp(1.05rem, 1.6vw, 1.45rem);
+  line-height: 1.08;
+}
+
+.metric-card.highlight {
+  border-color: rgba(224, 91, 48, 0.35);
+  background: #fff3e9;
+}
+
 .result-panel p,
 .cta-panel p {
   color: #42544b;
@@ -436,6 +471,7 @@ li::marker {
   .field-grid,
   .checkbox-grid,
   .results-view,
+  .estimate-grid,
   .presets {
     grid-template-columns: 1fr;
   }

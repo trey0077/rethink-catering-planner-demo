@@ -18,11 +18,12 @@ describe('buildRecommendation', () => {
     expect(result.riskFlags.join(' ')).toContain('Shellfish');
   });
 
-  it('recommends full buffet and logistics warnings for a 120-person wedding meal', () => {
+  it('recommends full buffet and cost add-ons for a 120-person wedding meal', () => {
     const result = buildRecommendation(presets.weddingFullMeal);
 
     expect(result.shortLabel).toBe('Full buffet with service planning');
     expect(result.reasons.join(' ')).toContain('100+ guests');
-    expect(result.riskFlags.join(' ')).toContain('staffing');
+    expect(result.costEstimate.perPersonRange).toEqual([50, 150]);
+    expect(result.summary).toContain('Early planning estimate');
   });
 });
