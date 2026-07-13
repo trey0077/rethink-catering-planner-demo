@@ -29,6 +29,8 @@ export type MealRole =
 
 export type EventTime = 'breakfast/morning' | 'lunch' | 'afternoon' | 'evening';
 export type ServiceStyle = 'drop-off catering' | 'food truck' | 'buffet style' | 'family style' | 'plated dinner' | 'full service/staffed' | 'not sure';
+export type VenueSupport = 'venue provides basics' | 'some items included' | 'blank space / bring everything' | 'not sure';
+export type SetupWindow = 'tight same-day' | 'standard same-day' | 'early access / multi-day' | 'not sure';
 export type BudgetPosture = 'economical' | 'balanced' | 'elevated' | 'impress them without going insane';
 export type CrowdProfile =
   | 'conservative eaters'
@@ -49,6 +51,9 @@ export type PlannerInput = {
   dietaryNeeds: DietaryNeed[];
   includeAlcohol: boolean;
   rentalNeeds: RentalNeed[];
+  venueSupport: VenueSupport;
+  setupWindow: SetupWindow;
+  parkingShuttleConcern: boolean;
   notes: string;
 };
 
@@ -88,6 +93,9 @@ export const defaultInput: PlannerInput = {
   dietaryNeeds: ['vegetarian', 'gluten-free'],
   includeAlcohol: false,
   rentalNeeds: [],
+  venueSupport: 'not sure',
+  setupWindow: 'not sure',
+  parkingShuttleConcern: false,
   notes: '',
 };
 
@@ -104,6 +112,9 @@ export const presets: Record<string, PlannerInput> = {
     dietaryNeeds: ['vegetarian', 'gluten-free'],
     includeAlcohol: false,
     rentalNeeds: [],
+    venueSupport: 'some items included',
+    setupWindow: 'standard same-day',
+    parkingShuttleConcern: false,
     notes: 'Training day. Keep setup simple and avoid messy foods.',
   },
   cocktailOpenHouse: {
@@ -118,6 +129,9 @@ export const presets: Record<string, PlannerInput> = {
     dietaryNeeds: ['vegetarian', 'seafood/shellfish concern'],
     includeAlcohol: true,
     rentalNeeds: ['plates/glassware/silverware', 'linens'],
+    venueSupport: 'some items included',
+    setupWindow: 'standard same-day',
+    parkingShuttleConcern: true,
     notes: 'Guests will be standing and alcohol may be served.',
   },
   weddingFullMeal: {
@@ -132,6 +146,9 @@ export const presets: Record<string, PlannerInput> = {
     dietaryNeeds: ['vegetarian', 'gluten-free', 'dairy-free'],
     includeAlcohol: true,
     rentalNeeds: ['plates/glassware/silverware', 'linens', 'tables/chairs'],
+    venueSupport: 'venue provides basics',
+    setupWindow: 'early access / multi-day',
+    parkingShuttleConcern: true,
     notes: 'Reception-style dinner after a short ceremony.',
   },
 };
@@ -281,6 +298,9 @@ function buildReasons(input: PlannerInput, directionType: DirectionType): string
   if (directionType === 'breakfast') reasons.unshift('Morning events work best when caffeine, timing, and simple setup are solved first.');
   if (input.includeAlcohol) reasons.push('Alcohol can materially change the quote; open bars often add a separate per-person range.');
   if (input.rentalNeeds.length > 0) reasons.push('Rentals move the estimate beyond food cost; plates, linens, tables, and tents can be their own line items.');
+  if (input.venueSupport !== 'not sure') reasons.push(`Venue support is marked as ${input.venueSupport}, so the quote should separate what the venue provides from what the caterer must bring.`);
+  if (input.setupWindow !== 'not sure') reasons.push(`Setup window is ${input.setupWindow}; this changes vendor arrival, buffet setup, and cleanup pressure.`);
+  if (input.parkingShuttleConcern || input.guestCount > 65) reasons.push('Parking or shuttle flow can affect guest arrival timing and service start, especially above roughly 65 guests.');
   if (input.guestCount >= 100) reasons.push('At 100+ guests, logistics can affect the experience as much as menu selection.');
   if (input.guestCount >= 40) reasons.push('The plan starts at 40 guests, matching the common minimum noted in the research brief.');
   return reasons;
@@ -293,6 +313,10 @@ function buildRiskFlags(input: PlannerInput, directionType: DirectionType): stri
   if (input.mealRole === 'light snacks' && (input.eventTime === 'lunch' || input.eventTime === 'evening')) flags.push('Light snacks may be read as a meal replacement at this time of day; confirm guest expectations.');
   if ((input.serviceStyle === 'drop-off catering' || input.serviceStyle === 'food truck') && input.guestCount >= 100) flags.push('Very large casual-service events still need line-flow, replenishment, and backup timing plans.');
   if ((directionType === 'buffet' || input.guestCount >= 100) && input.serviceStyle !== 'full service/staffed' && input.serviceStyle !== 'plated dinner') flags.push('Large buffet service should include a staffing or setup conversation before the caterer prices it.');
+  if (input.venueSupport === 'blank space / bring everything') flags.push('Blank-space venues can turn rentals, bars, service tables, trash, ice, and power into separate budget lines.');
+  if (input.venueSupport === 'not sure') flags.push('Venue-provided items are unknown; confirm tables, chairs, linens, bars, service tables, kitchen access, A/V, and trash before renting duplicates.');
+  if (input.setupWindow === 'tight same-day') flags.push('Tight same-day setup can create rush fees, limited menu flexibility, or staffing pressure.');
+  if (input.parkingShuttleConcern || input.guestCount > 65) flags.push('Parking, valet, or shuttle planning may be needed for this headcount before finalizing arrival and service timing.');
   if (input.budgetPosture === 'economical' && input.eventType === 'Wedding-related event') flags.push('Wedding-related events often need more service detail than an economical menu alone can solve.');
   return flags.length > 0 ? flags : ['No major red flags from the inputs; still confirm availability, staffing, and dietary details with the caterer.'];
 }
@@ -309,6 +333,9 @@ function buildChecklist(input: PlannerInput, directionType: DirectionType): stri
   if (directionType === 'breakfast') checklist.unshift('Lock coffee quantity, drop-off time, and whether guests arrive all at once.');
   if (input.includeAlcohol) checklist.push('Ask whether bar service is open bar, beer/wine only, consumption-based, or BYOB-compatible.');
   if (input.rentalNeeds.length > 0) checklist.push(`Confirm rental responsibility for: ${input.rentalNeeds.join(', ')}.`);
+  checklist.push('Confirm which items the venue already includes before paying for rentals: tables, chairs, linens, bars, food-service tables, A/V, fans, ice, trash, and power.');
+  checklist.push('Confirm vendor load-in, setup, serving window, and load-out timing; these are BEO-level details, not day-of guesses.');
+  if (input.parkingShuttleConcern || input.guestCount > 65) checklist.push('Ask whether parking, valet, or shuttle timing affects guest arrival and food service start.');
   if (input.guestCount >= 100) checklist.push('Discuss staffing, replenishment, and whether multiple serving stations are needed.');
   return checklist;
 }
@@ -325,6 +352,8 @@ function buildQuestions(input: PlannerInput, directionType: DirectionType): stri
   if (directionType === 'boxed') questions.push('Should boxes be labeled by guest name, dietary need, or entree type?');
   if (input.serviceStyle === 'not sure') questions.push('Would drop-off work, or does the caterer recommend staffed setup for this guest count?');
   if (input.rentalNeeds.length > 0) questions.push('Are rentals handled by the caterer, the venue, or a separate rental vendor?');
+  questions.push('Who owns the final floor plan, vendor load-in timeline, and day-of coordination handoff?');
+  if (input.parkingShuttleConcern || input.guestCount > 65) questions.push('Will parking, valet, or shuttle timing change when food should be ready?');
   return questions;
 }
 
@@ -390,6 +419,7 @@ function buildSummary(input: PlannerInput, shortLabel: string, spread: string[],
     `Event context: ${input.eventType}, ${input.eventTime}, meal role is ${input.mealRole}.`,
     `Preferred service: ${input.serviceStyle}. Budget posture: ${input.budgetPosture}. Crowd: ${input.crowdProfile}.`,
     `Dietary needs: ${dietary}. Alcohol: ${input.includeAlcohol ? 'yes/possibly' : 'not currently planned'}. Rentals: ${rentals}.${notes}`,
+    `Venue/logistics: ${input.venueSupport}; setup window: ${input.setupWindow}; parking/shuttle concern: ${input.parkingShuttleConcern || input.guestCount > 65 ? 'yes/check it' : 'not flagged'}.`,
     `Recommended direction: ${shortLabel}.`,
     `Early planning estimate: food ${formatRange(cost.foodSubtotalRange)}, likely all-in ${formatRange(cost.likelyTotalRange)} before exact menu/tax/venue details.`,
     `Suggested structure: ${spread.slice(0, 3).join(' ')}`,

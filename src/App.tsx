@@ -16,6 +16,8 @@ import {
   presets,
   type RentalNeed,
   type ServiceStyle,
+  type SetupWindow,
+  type VenueSupport,
 } from './lib/recommendation';
 
 const eventTypes: EventType[] = [
@@ -30,6 +32,8 @@ const eventTypes: EventType[] = [
 const mealRoles: MealRole[] = ['light snacks', 'heavy hors d’oeuvres', 'full meal buffet', 'boxed / grab-and-go', 'take-home trays'];
 const eventTimes: EventTime[] = ['breakfast/morning', 'lunch', 'afternoon', 'evening'];
 const serviceStyles: ServiceStyle[] = ['drop-off catering', 'food truck', 'buffet style', 'family style', 'plated dinner', 'full service/staffed', 'not sure'];
+const venueSupportOptions: VenueSupport[] = ['venue provides basics', 'some items included', 'blank space / bring everything', 'not sure'];
+const setupWindowOptions: SetupWindow[] = ['tight same-day', 'standard same-day', 'early access / multi-day', 'not sure'];
 const budgetPostures: BudgetPosture[] = ['economical', 'balanced', 'elevated', 'impress them without going insane'];
 const crowdProfiles: CrowdProfile[] = [
   'conservative eaters',
@@ -160,6 +164,20 @@ export function App() {
                   <span>{need}</span>
                 </label>
               ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="dietary-field">
+            <legend>Venue logistics</legend>
+            <div className="field-grid compact-grid">
+              <SelectField label="Venue support" value={input.venueSupport} options={venueSupportOptions} onChange={(value) => update('venueSupport', value)} />
+              <SelectField label="Setup window" value={input.setupWindow} options={setupWindowOptions} onChange={(value) => update('setupWindow', value)} />
+            </div>
+            <div className="checkbox-grid single-option">
+              <label className="checkbox-pill">
+                <input type="checkbox" checked={input.parkingShuttleConcern} onChange={(event) => update('parkingShuttleConcern', event.target.checked)} />
+                <span>parking / valet / shuttle may affect timing</span>
+              </label>
             </div>
           </fieldset>
 
