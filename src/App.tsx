@@ -2,6 +2,7 @@ import { CalendarDays, Clipboard, DollarSign, ListChecks, MessageSquareText, Spa
 import { useMemo, useState } from 'react';
 import {
   buildRecommendation,
+  defaultFutureDate,
   defaultInput,
   dietaryOptions,
   formatRange,
@@ -50,7 +51,7 @@ const presetButtons = [
 ] as const;
 
 export function App() {
-  const [input, setInput] = useState<PlannerInput>(defaultInput);
+  const [input, setInput] = useState<PlannerInput>(() => ({ ...defaultInput, eventDate: defaultFutureDate() }));
   const [copied, setCopied] = useState(false);
   const recommendation = useMemo(() => buildRecommendation(input), [input]);
 
@@ -111,7 +112,7 @@ export function App() {
 
           <div className="presets" aria-label="Demo presets">
             {presetButtons.map(([label, preset]) => (
-              <button key={label} type="button" onClick={() => setInput(preset)} className="preset-button">
+              <button key={label} type="button" onClick={() => setInput((current) => ({ ...preset, eventDate: current.eventDate || defaultFutureDate() }))} className="preset-button">
                 {label}
               </button>
             ))}

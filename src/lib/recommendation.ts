@@ -410,6 +410,12 @@ export function formatRange(range: [number, number]): string {
   return `${money(range[0])}–${money(range[1])}`;
 }
 
+/** A sensible default event date (roughly `daysAhead` out) so the demo opens on the happy path, not an empty-date warning. */
+export function defaultFutureDate(daysAhead = 60): string {
+  const date = new Date(Date.now() + daysAhead * 86_400_000);
+  return date.toISOString().slice(0, 10);
+}
+
 function buildSummary(input: PlannerInput, shortLabel: string, spread: string[], riskFlags: string[], cost: CostEstimate): string {
   const dietary = input.dietaryNeeds.length > 0 ? input.dietaryNeeds.join(', ') : 'not yet confirmed';
   const rentals = input.rentalNeeds.length > 0 ? input.rentalNeeds.join(', ') : 'not requested yet';
